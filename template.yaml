@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  FlaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      CodeUri: deployment-package.zip
+      Policies:
+        - SecretsManagerReadWrite
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /create_task
+            Method: POST
+
+  TodoistSecret:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Name: !Sub 'todoist-secret'
+      SecretString: !Sub '{"TODOIST_API_KEY": "REPLACE_WITH_API_KEY"}'
+
+Outputs:
+  FlaskApiUrl:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/create_task"
+    Description: "API Gateway endpoint URL for the Flask function"
